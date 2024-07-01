@@ -46,7 +46,8 @@ cd lisk-node
 
 1. Ensure you have an Ethereum L1 full node RPC available (not Lisk), and set the `OP_NODE_L1_ETH_RPC` and the `OP_NODE_L1_BEACON` variables (within the `.env.*` files, if using docker-compose). If running your own L1 node, it needs to be synced before the Lisk node will be able to fully sync.
 2. Please ensure that the environment file relevant to your network (`.env.sepolia`, or `.env.mainnet`) is set for the `env_file` properties within `docker-compose.yml`. By default, it is set to `.env.mainnet`.
-3. Run:
+3. We currently support running either the `op-geth` or the `op-reth` nodes alongside the `op-node`. By default, we run the `op-geth` node. If you would like to run the `op-reth` node instead, please set the `CLIENT` environment variable to `reth` before starting the node.
+4. Run:
 
 ```
 docker compose up --build --detach
@@ -64,6 +65,7 @@ curl -s -d '{"id":0,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["l
 #### Build
 
 To build `op-node` and `op-geth` from source, follow the OP [documentation](https://docs.optimism.io/builders/node-operators/tutorials/node-from-source).
+<br>To build `op-reth` from source, follow the reth official [documentation](https://reth.rs/run/optimism.html#installing-op-reth).
 <br>Before proceeding, please make sure to install the following dependency (**this information is missing in the above OP documentation**):
 
 - jq
@@ -125,12 +127,12 @@ For, Lisk Sepolia Testnet:
     --ws.api=debug,eth,net,engine \
     --metrics \
     --metrics.addr=0.0.0.0 \
-    --metrics.port=606 \
+    --metrics.port=6060 \
     --syncmode=full \
     --gcmode=full \
     --maxpeers=100 \
     --nat=extip:0.0.0.0 \
-    --rollup.sequencerhttp=https://rpc.sepolia-api.lisk.com \
+    --rollup.sequencerhttp=SEQUENCER_HTTP \
     --rollup.halt=major \
     --port=30303 \
     --rollup.disabletxpoolgossip=true \
@@ -160,18 +162,83 @@ For, Lisk Mainnet:
     --ws.api=debug,eth,net,engine \
     --metrics \
     --metrics.addr=0.0.0.0 \
-    --metrics.port=606 \
+    --metrics.port=6060 \
     --syncmode=full \
     --gcmode=full \
     --maxpeers=100 \
     --nat=extip:0.0.0.0 \
-    --rollup.sequencerhttp=https://rpc.api.lisk.com \
+    --rollup.sequencerhttp=SEQUENCER_HTTP \
     --rollup.halt=major \
     --port=30303 \
     --rollup.disabletxpoolgossip=true
 ```
 
 Refer to the `op-geth` configuration [documentation](https://docs.optimism.io/builders/node-operators/management/configuration#op-geth) for detailed information about available options.
+
+#### Run op-reth
+
+Navigate to your `reth` directory and start service by running the command:
+
+For, Lisk Sepolia Testnet:
+
+```sh
+./target/release/op-reth node \
+  -vvv \
+  --datadir="$DATADIR_PATH" \
+  --log.stdout.format log-fmt \
+  --ws \
+  --ws.origins="*" \
+  --ws.addr=0.0.0.0 \
+  --ws.port=8546 \
+  --ws.api=debug,eth,net,txpool \
+  --http \
+  --http.corsdomain="*" \
+  --http.addr=0.0.0.0 \
+  --http.port=8545 \
+  --http.api=debug,eth,net,txpool \
+  --authrpc.addr=0.0.0.0 \
+  --authrpc.port=8551 \
+  --authrpc.jwtsecret=PATH_TO_JWT_TEXT_FILE \
+  --metrics=0.0.0.0:6060 \
+  --chain=PATH_TO_NETWORK_GENESIS_FILE \
+  --disable-discovery \
+  --rollup.sequencer-http=SEQUENCER_HTTP \
+  --rollup.disable-tx-pool-gossip \
+  --override.canyon=0
+```
+
+For, Lisk Mainnet:
+
+```sh
+./target/release/op-reth node \
+  -vvv \
+  --datadir="$DATADIR_PATH" \
+  --log.stdout.format log-fmt \
+  --ws \
+  --ws.origins="*" \
+  --ws.addr=0.0.0.0 \
+  --ws.port=8546 \
+  --ws.api=debug,eth,net,txpool \
+  --http \
+  --http.corsdomain="*" \
+  --http.addr=0.0.0.0 \
+  --http.port=8545 \
+  --http.api=debug,eth,net,txpool \
+  --authrpc.addr=0.0.0.0 \
+  --authrpc.port=8551 \
+  --authrpc.jwtsecret=PATH_TO_JWT_TEXT_FILE \
+  --metrics=0.0.0.0:6060 \
+  --chain=PATH_TO_NETWORK_GENESIS_FILE \
+  --disable-discovery \
+  --rollup.sequencer-http=SEQUENCER_HTTP \
+  --rollup.disable-tx-pool-gossip
+```
+
+Refer to the `reth` configuration [documentation](https://reth.rs/cli/reth/node.html#reth-node) for detailed information about available options.
+
+> **Note**: Official Lisk sequencer HTTP:
+> <br>For Mainnet: https://rpc.sepolia-api.lisk.com
+> <br>For Sepolia Testnet: https://rpc.api.lisk.com
 
 #### Run op-node
 
@@ -182,7 +249,7 @@ For, Lisk Sepolia Testnet:
 ```sh
 ./bin/op-node \
   --l1=$OP_NODE_L1_ETH_RPC \
-  --l1.rpckind=$$OP_NODE_L1_RPC_KIND \
+  --l1.rpckind=$OP_NODE_L1_RPC_KIND \
   --l1.beacon=$OP_NODE_L1_BEACON \
   --l2=ws://localhost:8551 \
   --l2.jwt-secret=PATH_TO_JWT_TEXT_FILE \
@@ -194,7 +261,7 @@ For, Lisk Mainnet:
 ```sh
 ./bin/op-node \
   --l1=$OP_NODE_L1_ETH_RPC \
-  --l1.rpckind=$$OP_NODE_L1_RPC_KIND \
+  --l1.rpckind=$OP_NODE_L1_RPC_KIND \
   --l1.beacon=$OP_NODE_L1_BEACON \
   --l2=ws://localhost:8551 \
   --l2.jwt-secret=PATH_TO_JWT_TEXT_FILE \
