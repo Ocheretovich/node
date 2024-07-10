@@ -45,20 +45,21 @@ cd lisk-node
 ### Docker
 
 1. Ensure you have an Ethereum L1 full node RPC available (not Lisk), and set the `OP_NODE_L1_ETH_RPC` and the `OP_NODE_L1_BEACON` variables (within the `.env.*` files, if using docker-compose). If running your own L1 node, it needs to be synced before the Lisk node will be able to fully sync.
+
 2. Please ensure that the environment file relevant to your network (`.env.sepolia`, or `.env.mainnet`) is set for the `env_file` properties within `docker-compose.yml`. By default, it is set to `.env.mainnet`.
+
 3. We currently support running either the `op-geth` or the `op-reth` nodes alongside the `op-node`. By default, we run the `op-geth` node. If you would like to run the `op-reth` node instead, please set the `CLIENT` environment variable to `reth` before starting the node.
+
 4. Run:
+    ```sh
+    docker compose up --build --detach
+    ```
 
-```
-docker compose up --build --detach
-```
-
-4. You should now be able to `curl` your Lisk node:
-
-```
-curl -s -d '{"id":0,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}' \
-  -H "Content-Type: application/json" http://localhost:8545
-```
+5. You should now be able to `curl` your Lisk node:
+    ```sh
+    curl -s -d '{"id":0,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}' \
+      -H "Content-Type: application/json" http://localhost:8545
+    ```
 
 ### Source
 
@@ -136,7 +137,8 @@ For, Lisk Sepolia Testnet:
     --rollup.halt=major \
     --port=30303 \
     --rollup.disabletxpoolgossip=true \
-    --override.canyon=0
+    --override.canyon=0 \
+    --override.fjord=1716998400
 ```
 
 For, Lisk Mainnet:
@@ -170,42 +172,18 @@ For, Lisk Mainnet:
     --rollup.sequencerhttp=SEQUENCER_HTTP \
     --rollup.halt=major \
     --port=30303 \
-    --rollup.disabletxpoolgossip=true
+    --rollup.disabletxpoolgossip=true \
+    --override.fjord=1720627201
 ```
 
 Refer to the `op-geth` configuration [documentation](https://docs.optimism.io/builders/node-operators/management/configuration#op-geth) for detailed information about available options.
 
 #### Run op-reth
 
+> **Note**:
+> <br>Currently we do not support running the reth client on the Lisk Sepolia Testnet.
+
 Navigate to your `reth` directory and start service by running the command:
-
-For, Lisk Sepolia Testnet:
-
-```sh
-./target/release/op-reth node \
-  -vvv \
-  --datadir="$DATADIR_PATH" \
-  --log.stdout.format log-fmt \
-  --ws \
-  --ws.origins="*" \
-  --ws.addr=0.0.0.0 \
-  --ws.port=8546 \
-  --ws.api=debug,eth,net,txpool \
-  --http \
-  --http.corsdomain="*" \
-  --http.addr=0.0.0.0 \
-  --http.port=8545 \
-  --http.api=debug,eth,net,txpool \
-  --authrpc.addr=0.0.0.0 \
-  --authrpc.port=8551 \
-  --authrpc.jwtsecret=PATH_TO_JWT_TEXT_FILE \
-  --metrics=0.0.0.0:6060 \
-  --chain=PATH_TO_NETWORK_GENESIS_FILE \
-  --disable-discovery \
-  --rollup.sequencer-http=SEQUENCER_HTTP \
-  --rollup.disable-tx-pool-gossip \
-  --override.canyon=0
-```
 
 For, Lisk Mainnet:
 
@@ -260,7 +238,8 @@ For, Lisk Sepolia Testnet:
   --l1.beacon=$OP_NODE_L1_BEACON \
   --l2=ws://localhost:8551 \
   --l2.jwt-secret=PATH_TO_JWT_TEXT_FILE \
-  --rollup.config=PATH_TO_NETWORK_ROLLUP_FILE
+  --rollup.config=PATH_TO_NETWORK_ROLLUP_FILE \
+  --override.fjord=1716998400
 ```
 
 For, Lisk Mainnet:
@@ -272,7 +251,8 @@ For, Lisk Mainnet:
   --l1.beacon=$OP_NODE_L1_BEACON \
   --l2=ws://localhost:8551 \
   --l2.jwt-secret=PATH_TO_JWT_TEXT_FILE \
-  --rollup.config=PATH_TO_NETWORK_ROLLUP_FILE
+  --rollup.config=PATH_TO_NETWORK_ROLLUP_FILE \
+  --override.fjord=1720627201
 ```
 
 The above command starts `op-node` in **full sync** mode. Depending on the chain length, the initial sync process could take significant time; varying from days to weeks.

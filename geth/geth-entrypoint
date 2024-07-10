@@ -13,10 +13,16 @@ ADDITIONAL_ARGS=""
 OP_GETH_GCMODE="${OP_GETH_GCMODE:-full}"
 OP_GETH_SYNCMODE="${OP_GETH_SYNCMODE:-full}"
 
+# TODO: Enable this check once Lisk configs are added to the superchain registry repo
 # if [[ -z "$OP_NODE_NETWORK" ]]; then
 #     echo "expected OP_NODE_NETWORK to be set" 1>&2
 #     exit 1
 # fi
+
+if [[ -z "$OVERRIDE_FJORD" ]]; then
+    echo "expected OVERRIDE_FJORD to be set" 1>&2
+    exit 2
+fi
 
 mkdir -p $GETH_DATA_DIR
 
@@ -79,4 +85,5 @@ fi
     # --op-network="$OP_NODE_NETWORK" \
     --port="$P2P_PORT" \
     --rollup.disabletxpoolgossip=true \
+    --override.fjord=$OVERRIDE_FJORD \
     $ADDITIONAL_ARGS # intentionally unquoted
