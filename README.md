@@ -36,8 +36,7 @@ The following system requirements are recommended to run a Lisk L2 node.
 ## Usage
 
 > **Note**:
-> - It is currently not possible to run the nodes with the `--op-network` flag until the configs for Lisk have been merged to the [superchain-registry](https://github.com/ethereum-optimism/superchain-registry).
-> - Currently, due to ongoing changes in the above repo, addition of new chains to the registry have been paused. Once the maintenance is over, we will submit PRs to add the config for both Lisk Sepolia and Lisk Mainnet.
+> - It is currently not possible to run the nodes with the `--op-network` flag until the open PRs for adding configs for [Lisk Sepolia](https://github.com/ethereum-optimism/superchain-registry/pull/506) and [Lisk Mainnet](https://github.com/ethereum-optimism/superchain-registry/pull/502) are merged into the [superchain-registry](https://github.com/ethereum-optimism/superchain-registry).
 
 ### Clone the Repository
 
@@ -54,8 +53,8 @@ cd lisk-node
 
 1. We currently support running either the `op-geth` or the `op-reth` nodes alongside the `op-node`. By default, we run the `op-geth` node. If you would like to run the `op-reth` client, please set the `CLIENT` environment variable to `reth` before starting the node.
     > **Note**:
-    > - The `op-reth` client can be built in either the `release` (default) or `maxperf` profile. To learn more about them, please check reth's documentation on [Optimizations](https://github.com/paradigmxyz/reth/blob/main/book/installation/source.md#optimizations). Please set the `RETH_BUILD_PROFILE` environment variable accordingly.
-    > - If you are building the `op-reth` client in `maxperf` profile, please ensure that you have a machine with 32 GB RAM.
+    > - The `op-reth` client can be built in either the `maxperf` (default) or `release` profile. To learn more about them, please check reth's documentation on [Optimizations](https://github.com/paradigmxyz/reth/blob/main/book/installation/source.md#optimizations). Please set the `RETH_BUILD_PROFILE` environment variable accordingly.
+    > - Unless you are building the `op-reth` client in `release` profile, please ensure that you have a machine with 32 GB RAM.
     > - Additionally, if you have the Docker Desktop installed on your system, please make sure to set `Memory limit` to a minimum of `16 GB`.<br>It can be set under `Settings -> Resources -> Resource Allocation -> Memory limit`.
 
 1. Run:
@@ -82,7 +81,7 @@ cd lisk-node
   - [jq](https://jqlang.github.io/jq/)
 
 - To build `op-node` and `op-geth` from source, follow the OP [documentation](https://docs.optimism.io/builders/node-operators/tutorials/node-from-source).
-  - Before building the `op-node`, please patch the code with [`lisk-hotfix.patch`](./geth/lisk-hotfix.patch) for an unhandled `SystemConfig` event emitted on Lisk Sepolia, resulting in errors on the Lisk nodes.
+  - Before building the `op-node`, please patch the code with [`lisk-hotfix.patch`](./op-node-lisk-hotfix.patch) for an unhandled `SystemConfig` event emitted on Lisk Sepolia, resulting in errors on the Lisk nodes.
     ```sh
     git apply <path-to-lisk-hotfix.patch>
     ```
