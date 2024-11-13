@@ -3,17 +3,13 @@ FROM golang:1.22 AS op
 WORKDIR /app
 
 ENV REPO=https://github.com/ethereum-optimism/optimism.git
-ENV VERSION=v1.9.4
-ENV COMMIT=2c24e652161187f3e30045eac1e176e6b53c469d
+ENV VERSION=v1.9.5
+ENV COMMIT=5662448279e4fb16e073e00baeb6e458b12a59b2
 RUN git clone $REPO --branch op-node/$VERSION --single-branch . && \
     git switch -c branch-$VERSION && \
     bash -c '[ "$(git rev-parse HEAD)" = "$COMMIT" ]'
 
-# Patch to handle the legacy ConfigUpdate event GAS_CONFIG_ECOTONE that shouldn't be used anymore
-# Emitted only on Lisk Sepolia from the SystemConfig contract
-COPY op-node-lisk-hotfix.patch .
-RUN git apply op-node-lisk-hotfix.patch && \
-    cd op-node && \
+RUN cd op-node && \
     make VERSION=$VERSION op-node
 
 FROM rust:1.82 AS reth
