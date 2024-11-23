@@ -19,18 +19,13 @@ ADDITIONAL_ARGS=""
 OP_GETH_GCMODE="${OP_GETH_GCMODE:-full}"
 OP_GETH_SYNCMODE="${OP_GETH_SYNCMODE:-full}"
 
-# TODO: Enable this check once Lisk configs are added to the superchain registry repo
-# if [[ -z "$OP_NODE_NETWORK" ]]; then
-#     echo "expected OP_NODE_NETWORK to be set" 1>&2
-#     exit 1
-# fi
+if [[ -z "$OP_NODE_NETWORK" ]]; then
+    echo "expected OP_NODE_NETWORK to be set" 1>&2
+    exit 1
+fi
 
 # Ensure data directory exists
 mkdir -p $GETH_DATA_DIR
-
-# Init genesis
-echoBanner "Initializing data directory under '${GETH_DATA_DIR}'"
-./geth init --datadir=$GETH_DATA_DIR "$GENESIS_FILE_PATH"
 
 # Download and apply snapshot, when configured
 (. download-apply-snapshot.sh)
@@ -61,6 +56,7 @@ fi
 # Start service
 echoBanner "Starting op-geth execution node..."
 ./geth \
+    --op-network="$OP_NODE_NETWORK" \
     --datadir="$GETH_DATA_DIR" \
     --verbosity="$VERBOSITY" \
     --authrpc.addr=0.0.0.0 \
@@ -89,6 +85,3 @@ echoBanner "Starting op-geth execution node..."
     --rollup.halt=major \
     --rollup.disabletxpoolgossip=true \
     $ADDITIONAL_ARGS # intentionally unquoted
-
-# Add the following flag(s) after Lisk is added to the Superchain Registry
-    # --op-network="$OP_NODE_NETWORK"
